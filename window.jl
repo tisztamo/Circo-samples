@@ -10,7 +10,7 @@ end
 function sessioncount(purchases::Array{Purchase})::Int64
     allsessions = Set()
     for purchase in purchases
-        allsessions = union(allsessions, purchase.followingsessions)
+        union!(allsessions, purchase.followingsessions)
     end
     length(allsessions)
 end
@@ -55,7 +55,7 @@ function abstatscalculator(;return_rawconfidence=false)
         if a_visitors == 0 || b_visitors == 0
             return nothing
         end
-        url = "http://localhost:4000/abtestcalculator.php?control_visitors=$a_visitors&control_conversions=$a_purchases&treatment_visitors=$b_visitors&treatment_conversions=$b_purchases"
+        url = "http://127.0.0.1:4000/abtestcalculator.php?control_visitors=$a_visitors&control_conversions=$a_purchases&treatment_visitors=$b_visitors&treatment_conversions=$b_purchases"
         r = HTTP.get(url)
         r.status == 200 || error("Got response from $url:\n$r")
         rbody = JSON.parse(String(r.body))
@@ -69,16 +69,17 @@ function abstatscalculator(;return_rawconfidence=false)
     end
 end
 
-windowsizes = [300, 500, 1000] #[10, 50, 100, 150, 200, 250, 300, 350, 400, 500]
+windowsizes = [10, 50, 100, 150, 200, 250, 300, 350, 400, 500]
 for windowsize in windowsizes
     println("Processing window size $windowsize")
+    ispath("results") || mkdir("results")
     outfilename = "results/windowed_rawconfidence_$windowsize.csv"
     rm(outfilename;force=true)
     workflow =  CSV.read("assets/test_0_events.csv") |
                 windowed_abresults(windowsize) |
                 abstatscalculator(return_rawconfidence=true)  > outfilename
 
-    result = workflow()
+    @time result = workflow()
 end
 
 #@test result == 200
