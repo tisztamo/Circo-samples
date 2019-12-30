@@ -33,6 +33,12 @@ version = "1.0.0"
 [[Base64]]
 uuid = "2a0f44e3-6c83-55bd-87e4-b1978d98bd5f"
 
+[[BenchmarkTools]]
+deps = ["JSON", "Printf", "Statistics"]
+git-tree-sha1 = "90b73db83791c5f83155016dd1cc1f684d4e1361"
+uuid = "6e4b80f9-dd63-53aa-95a3-0cdb28fa8baf"
+version = "0.4.3"
+
 [[BinDeps]]
 deps = ["Compat", "Libdl", "SHA", "URIParser"]
 git-tree-sha1 = "12093ca6cdd0ee547c39b1870e0c9c3f154d9ca9"
@@ -62,8 +68,8 @@ uuid = "324d7699-5711-5eae-9e2f-1d82baa6b597"
 version = "0.7.3"
 
 [[Circo]]
-deps = ["CSV", "DataFrames", "Gadfly", "HTTP", "JSON", "Jive", "PkgTemplates", "Revise", "Test"]
-git-tree-sha1 = "c7956ea5202711d208967680aa9bb0b894e9c0af"
+deps = ["BenchmarkTools", "CSV", "DataFrames", "HTTP", "JSON", "Jive", "PkgTemplates", "Revise", "Test"]
+git-tree-sha1 = "91e3560d9cbec4fd309f9c8f39ec23d866c1c668"
 repo-rev = "master"
 repo-url = "https://github.com/tisztamo/Circo.jl"
 uuid = "4f05b990-1b3c-11ea-1014-77885b5fe94c"

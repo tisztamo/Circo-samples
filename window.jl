@@ -69,17 +69,43 @@ function abstatscalculator(;return_rawconfidence=false)
     end
 end
 
-windowsizes = [10, 50, 100, 150, 200, 250, 300, 350, 400, 500]
+function abstats_workflow(windowsize, outfilename)
+    return windowed_abresults(windowsize) |
+            abstatscalculator(return_rawconfidence=true) >
+            outfilename
+end
+
+function switch_purchaseclass(source_test_class, dropped_ratio)
+    dropped = 1
+    return function(event)
+        if event.test_class == source_test_class &&
+            event.event == "purchase" &&
+            rand() <= dropped_ratio
+            dropped += 1
+            return (test_class = 1 - event.test_class, session_id = event.session_id, event = event.event, qty = event.qty, amount = event.amount)
+        end
+        return event
+    end
+end
+
+ispath("results") || mkdir("results")
+
+windowsizes = [400]
 for windowsize in windowsizes
     println("Processing window size $windowsize")
-    ispath("results") || mkdir("results")
-    outfilename = "results/windowed_rawconfidence_$windowsize.csv"
-    rm(outfilename;force=true)
-    workflow =  CSV.read("assets/test_0_events.csv") |
-                windowed_abresults(windowsize) |
-                abstatscalculator(return_rawconfidence=true)  > outfilename
 
-    @time result = workflow()
+    outfilename = "results/aa_windowed_confidence_$windowsize.csv"
+    rm(outfilename;force=true)
+    aa_workflow = CSV.read("assets/test_0_events.csv") | abstats_workflow(windowsize, outfilename)
+    @time result = aa_workflow()
+
+    outfilename = "results/ab_windowed_confidence_$windowsize.csv"
+    rm(outfilename;force=true)
+    ab_workflow = CSV.read("assets/test_0_events.csv") |
+                    switch_purchaseclass(1, 0.05) |
+                    abstats_workflow(windowsize, outfilename)
+    @time result = ab_workflow()
+
 end
 
 #@test result == 200
